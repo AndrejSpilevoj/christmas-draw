@@ -73,8 +73,8 @@ footer{text-align:center;color:#765832;margin-top:24px;font-size:1.4rem}
 <form id="email-result" hidden style="max-width:360px;margin:18px auto 0">
 <label for="result-email">Jūsų el. pašto adresas</label>
 <input id="result-email" type="email" autocomplete="email" required>
-<button class="secondary" type="submit">Atidaryti laišką su rezultatu</button>
-<p>El. pašto programa atvers laiško juodraštį. Paspauskite „Siųsti“, kad gautumėte kopiją.</p>
+<button class="secondary" type="submit">Atidaryti rezultatą „Gmail“</button>
+<p>„Gmail“ atvers laiško juodraštį naujame skirtuke. Paspauskite „Siųsti“, kad gautumėte kopiją.</p>
 </form>
 </section>
 <footer aria-hidden="true">✦ ❦ ✦</footer>
@@ -376,10 +376,10 @@ function openDraw(data) {
     get('email-result').onsubmit = event => {
       event.preventDefault();
       const email = get('result-email').value.trim();
-      const address = encodeURIComponent(email).replace('%40', '@');
       const subject = encodeURIComponent('Jūsų kalėdinio vardų traukimo rezultatas');
       const body = encodeURIComponent('Dovanos gavėjas: ' + recipient + '\r\nDovanos raidė: ' + letter);
-      location.href = 'mailto:' + address + '?subject=' + subject + '&body=' + body;
+      const compose = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email);
+      window.open(compose + '&su=' + subject + '&body=' + body, '_blank', 'noopener,noreferrer');
     };
     get('result').hidden = false;
     get('instruction').hidden = true;
