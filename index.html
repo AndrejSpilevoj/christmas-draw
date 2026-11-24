@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>The Christmas Draw</title>
+<style>
+:root{color-scheme:light;--paper:#f5ead4;--ink:#302d23;--wine:#702c3d;--pine:#23463c;--gold:#a7773b;--line:#b79e77}
+*{box-sizing:border-box}body{margin:0;background:#17372f;color:var(--ink);font:1.05rem Georgia,serif}
+main{max-width:1000px;margin:22px auto;padding:clamp(18px,5vw,53px);border:7px double var(--gold);background:radial-gradient(ellipse at 50% 22%,#fff8e8,transparent 62%),repeating-linear-gradient(95deg,#9b775709 0 1px,transparent 1px 5px),var(--paper)}
+header{text-align:center;padding:0 0 23px;border-bottom:3px double var(--line)}
+.ornament{display:flex;align-items:center;justify-content:center;gap:17px;color:var(--gold);font-size:2.4rem;line-height:1}
+.ornament::before,.ornament::after{content:"";height:1px;width:min(22%,110px);background:var(--line)}
+h1{font-size:clamp(2.6rem,8vw,5.3rem);font-weight:400;line-height:.96;letter-spacing:-.045em;margin:17px 0;color:var(--wine);text-wrap:balance}
+p{line-height:1.55;margin:8px 0}header p{font-style:italic}
+.wheels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(6px,4vw,50px);margin:23px auto;max-width:680px}
+figure{margin:0;text-align:center;min-width:0}figcaption{color:var(--pine);font-size:clamp(1.05rem,3vw,1.45rem);margin:13px 0}
+.dial{position:relative;padding-top:7px}.dial::after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);border-left:10px solid transparent;border-right:10px solid transparent;border-top:24px solid #a87940;filter:drop-shadow(0 1px 1px #372715);z-index:1}
+canvas{display:block;width:100%;border-radius:50%;box-shadow:0 7px 14px #472f272e}
+.panel{max-width:680px;margin:25px auto 0;padding:clamp(13px,3vw,27px);border:3px double var(--line);background:#fff9ec86}
+h2{color:var(--pine);font-weight:400;margin:0 0 10px;font-size:1.65rem}
+label{display:block;margin-top:14px;color:var(--pine);font-weight:bold}
+input,select,button{font:inherit}input,select{display:block;width:100%;padding:10px;border:1px solid #947d5a;background:#fffcf3;color:var(--ink);margin:5px 0 9px;min-width:0}
+button,.mail{display:inline-block;border:1px solid var(--pine);padding:9px 14px;background:var(--pine);color:#fff7e4;cursor:pointer;text-decoration:none}
+button:hover,.mail:hover{background:#306052}button:disabled{cursor:default;opacity:.62}
+button.primary{background:var(--wine);border-color:var(--wine)}button.primary:hover{background:#87374b}
+button.secondary{background:transparent;color:var(--pine)}button.secondary:hover{background:#e9dcc2}
+.exclusions{margin:20px 0 0;border:1px solid var(--line);padding:8px 12px 12px}.exclusions legend{color:var(--pine);font-weight:bold}.exclusion{margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+.actions,.invite-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.person{display:grid;grid-template-columns:1fr 1.25fr auto;align-items:end;gap:8px}.person button{margin-bottom:9px}.person label{font-size:.92rem}
+#status,#invite-status{color:var(--wine)}#draw{text-align:center}#result{font-size:1.5rem;color:var(--wine)}#letter-result{font-size:2.25rem}
+.invite{padding:13px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+footer{text-align:center;color:#765832;margin-top:24px;font-size:1.4rem}
+@media(max-width:550px){main{margin:8px}.person{grid-template-columns:1fr auto;gap:0 8px}.person label:first-child{grid-column:1/-1}.person label{margin-top:3px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="ornament" aria-hidden="true">❦</div><h1>The Christmas Draw</h1><p>A family gift exchange</p></header>
+<section class="wheels" aria-label="Christmas draw wheels">
+<figure><div class="dial"><canvas id="names" width="600" height="600" aria-hidden="true"></canvas></div><figcaption>Gift recipient</figcaption></figure>
+<figure><div class="dial"><canvas id="letters" width="600" height="600" aria-hidden="true"></canvas></div><figcaption>Gift letter</figcaption></figure>
+</section>
+<section class="panel" id="setup">
+<h2>Set up the family draw</h2>
+<p>Add everyone who will give a gift, then send each person their own link.</p>
+<form id="form">
+<div id="people"></div>
+<div class="actions"><button class="secondary" id="add" type="button">Add a person</button></div>
+<fieldset class="exclusions">
+<legend>Who can’t draw whom?</legend>
+<p>Add a pair to keep them from drawing each other. For a one-way rule, clear the checkbox.</p>
+<div id="exclusions"></div>
+<div class="actions"><button class="secondary" id="add-exclusion" type="button">Add a rule</button></div>
+</fieldset>
+<label for="word">Christmas word</label>
+<input id="word" required placeholder="SNOWFLAKE" maxlength="100" aria-describedby="word-help">
+<p id="word-help">Use one word with at least as many distinct letters as people. Repeated letters count once.</p>
+<div class="actions"><button class="primary">Create draw links</button></div>
+<p id="status" role="status"></p>
+</form>
+<section id="invitations" hidden>
+<h2>Private draw links</h2>
+<p>Send one link to each person. The roster order determines how many choices each wheel shows. Keep a copy of the links before closing this page.</p>
+<div id="links"></div><p id="invite-status" role="status"></p>
+</section>
+</section>
+<section class="panel" id="draw" hidden>
+<h2 id="greeting"></h2>
+<p id="instruction">Spin both wheels to reveal who you’re giving to and your letter.</p>
+<button class="primary" id="spin" type="button">Spin both wheels</button>
+<p id="result" hidden aria-live="polite">You’re giving to <strong id="recipient"></strong><br>Your letter is <strong id="letter-result"></strong></p>
+</section>
+<footer aria-hidden="true">✦ ❦ ✦</footer>
+</main>
+<script>
+'use strict';
+const get = id => document.getElementById(id);
+const palette = ['#274a40','#733647','#3f505e','#826039','#4f4940','#365b4e'];
+const tau = Math.PI * 2;
+
+function paint(canvas, items, angle = 0) {
+  const ctx = canvas.getContext('2d');
+  const count = items.length;
+  const step = tau / count;
+  ctx.clearRect(0, 0, 600, 600);
+  ctx.save();
+  ctx.translate(300, 300);
+  ctx.fillStyle = '#795631';
+  ctx.beginPath();
+  ctx.arc(0, 0, 299, 0, tau);
+  ctx.fill();
+  items.forEach((item, index) => {
+    const center = angle - Math.PI / 2 + index * step;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, 281, center - step / 2, center + step / 2);
+    ctx.closePath();
+    ctx.fillStyle = palette[index % palette.length];
+    ctx.fill();
+    ctx.strokeStyle = '#bc9a63';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.save();
+    ctx.rotate(center + (Math.cos(center) < 0 ? Math.PI : 0));
+    ctx.fillStyle = '#fff1d3';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = (count > 14 ? 23 : count > 8 ? 31 : 42) + 'px Georgia';
+    ctx.fillText(item, Math.cos(center) < 0 ? -179 : 179, 0, 176);
+    ctx.restore();
+  });
+  [289, 277, 42, 32].forEach(radius => {
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, tau);
+    if (radius === 42) {
+      ctx.fillStyle = '#f2deaf';
+      ctx.fill();
+    }
+    ctx.strokeStyle = '#d6b477';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  });
+  ctx.font = '43px Georgia';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#704626';
+  ctx.fillText('✦', 0, 2);
+  ctx.restore();
+}
+
+function randomIndex(bound) {
+  const values = new Uint32Array(1);
+  const limit = 2 ** 32 - (2 ** 32 % bound);
+  do { crypto.getRandomValues(values); } while (values[0] >= limit);
+  return values[0] % bound;
+}
+
+function shuffle(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const other = randomIndex(index + 1);
+    [shuffled[index], shuffled[other]] = [shuffled[other], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function recipientsFor(names, blocked) {
+  const eligible = new Map(names.map(name => [
+    name, shuffle(names.filter(other => other !== name && !blocked.get(name)?.has(other)))
+  ]));
+  const giverByRecipient = new Map();
+
+  function assign(giver, visited) {
+    for (const recipient of eligible.get(giver)) {
+      if (visited.has(recipient)) continue;
+      visited.add(recipient);
+      const previousGiver = giverByRecipient.get(recipient);
+      if (!previousGiver || assign(previousGiver, visited)) {
+        giverByRecipient.set(recipient, giver);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  for (const giver of shuffle(names)) {
+    if (!assign(giver, new Set())) return null;
+  }
+  const recipientByGiver = new Map(
+    Array.from(giverByRecipient, ([recipient, giver]) => [giver, recipient])
+  );
+  return names.map(name => recipientByGiver.get(name));
+}
+
+function encode(data) {
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
+  return btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join(''))
+    .replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+}
+
+function decode(value) {
+  const bytes = Uint8Array.from(atob(value.replaceAll('-', '+').replaceAll('_', '/')), char => char.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+let nextPersonId = 0;
+
+function addPerson() {
+  const row = document.createElement('div');
+  row.className = 'person';
+  row.dataset.personId = String(++nextPersonId);
+  row.innerHTML = '<label>Name<input name="name" required maxlength="50" autocomplete="off"></label><label>Email<input name="email" type="email" required maxlength="254" autocomplete="off"></label><button type="button" class="secondary" aria-label="Remove participant">Remove</button>';
+  row.querySelector('button').onclick = () => {
+    if (get('people').children.length > 2) row.remove();
+    updateRows();
+  };
+  row.querySelector('[name=name]').addEventListener('input', refreshExclusions);
+  get('people').append(row);
+  updateRows();
+  return row.querySelector('input');
+}
+
+function updateRows() {
+  const count = get('people').children.length;
+  get('add').disabled = count >= 24;
+  get('people').querySelectorAll('button').forEach(button => { button.disabled = count <= 2; });
+  refreshExclusions();
+}
+
+function refreshExclusions() {
+  const roster = Array.from(get('people').children, (row, index) => ({
+    id: row.dataset.personId,
+    label: row.querySelector('[name=name]').value.trim() || 'Person ' + (index + 1)
+  }));
+  get('exclusions').querySelectorAll('select').forEach(select => {
+    const value = select.value;
+    select.replaceChildren(new Option('Choose a person', ''));
+    roster.forEach(person => select.add(new Option(person.label, person.id)));
+    select.value = roster.some(person => person.id === value) ? value : '';
+  });
+}
+
+function addExclusion() {
+  const rule = document.createElement('div');
+  rule.className = 'exclusion';
+  rule.innerHTML = '<label>Giver<select required></select></label><label>Cannot draw<select required></select></label><label><input type="checkbox" checked style="display:inline;width:auto;margin-right:7px">Block both directions</label><button class="secondary" type="button">Remove rule</button>';
+  rule.querySelector('button').onclick = () => rule.remove();
+  get('exclusions').append(rule);
+  refreshExclusions();
+  rule.querySelector('select').focus();
+}
+
+function showInvites(people, letters, recipients, assignedLetters, blocked) {
+  get('links').replaceChildren();
+  people.forEach(({ name, email }, index) => {
+    const names = shuffle(recipients.slice(index).filter(other => other !== name && !blocked.get(name)?.has(other)));
+    const remainingLetters = letters.filter(letter => assignedLetters.slice(index).includes(letter));
+    const url = new URL(location.href);
+    url.hash = 'draw=' + encode({ name, names, letters: remainingLetters, recipient: recipients[index], letter: assignedLetters[index] });
+    const row = document.createElement('div');
+    row.className = 'invite';
+    const title = document.createElement('strong');
+    title.textContent = name + ' · ' + email;
+    const actions = document.createElement('div');
+    actions.className = 'invite-actions';
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'secondary';
+    copy.textContent = 'Copy link';
+    copy.onclick = async () => {
+      try {
+        await navigator.clipboard.writeText(url.href);
+        get('invite-status').textContent = 'Link copied for ' + name + '.';
+      } catch {
+        const field = document.createElement('input');
+        field.readOnly = true;
+        field.setAttribute('aria-label', 'Draw link for ' + name);
+        field.value = url.href;
+        row.append(field);
+        field.select();
+      }
+    };
+    const mail = document.createElement('a');
+    mail.className = 'mail';
+    mail.textContent = 'Open email draft';
+    const body = 'Hi ' + name + ',\n\nSpin the Christmas wheels to reveal your gift recipient and letter. This is your private link:\n\n' + url.href;
+    const address = encodeURIComponent(email).replace('%40', '@');
+    mail.href = 'mailto:' + address + '?subject=The%20Christmas%20Draw&body=' + encodeURIComponent(body);
+    actions.append(copy, mail);
+    row.append(title, actions);
+    get('links').append(row);
+  });
+  get('form').hidden = true;
+  get('invitations').hidden = false;
+  get('invitations').scrollIntoView({ block: 'nearest' });
+}
+
+function setup() {
+  addPerson();
+  addPerson();
+  get('add').onclick = () => addPerson().focus();
+  get('add-exclusion').onclick = addExclusion;
+  get('form').onsubmit = event => {
+    event.preventDefault();
+    const rows = Array.from(get('people').children);
+    const people = rows.map(row => ({
+      name: row.querySelector('[name=name]').value.trim(),
+      email: row.querySelector('[name=email]').value.trim()
+    }));
+    const names = people.map(person => person.name);
+    const word = get('word').value.trim().normalize('NFC');
+    const letters = [...new Set(Array.from(word.toUpperCase().normalize('NFC')))];
+    let error = '';
+    if (names.some(name => !name) || new Set(names.map(name => name.normalize('NFC').toLowerCase())).size !== names.length) {
+      error = 'Give everyone a distinct name, such as Alex S. and Alex M.';
+    } else if (new Set(people.map(person => person.email.toLowerCase())).size !== people.length) {
+      error = 'Use a different email address for each person.';
+    } else if (!/^\p{L}+$/u.test(word)) {
+      error = 'Enter one word containing only letters.';
+    } else if (letters.length < people.length) {
+      error = 'Choose a word with at least ' + people.length + ' distinct letters.';
+    } else if (!/^https?:$/.test(location.protocol)) {
+      error = 'Open the hosted page before creating links that work on other devices.';
+    }
+    get('status').textContent = error;
+    if (error) return;
+    const namesById = new Map(rows.map((row, index) => [row.dataset.personId, names[index]]));
+    const blocked = new Map(names.map(name => [name, new Set()]));
+    for (const rule of get('exclusions').children) {
+      const [giverSelect, recipientSelect] = rule.querySelectorAll('select');
+      const giver = namesById.get(giverSelect.value);
+      const recipient = namesById.get(recipientSelect.value);
+      if (!giver || !recipient || giver === recipient) {
+        get('status').textContent = 'Choose two different people for each rule.';
+        return;
+      }
+      blocked.get(giver).add(recipient);
+      if (rule.querySelector('input').checked) blocked.get(recipient).add(giver);
+    }
+    const recipients = recipientsFor(names, blocked);
+    if (!recipients) {
+      get('status').textContent = 'These rules leave no valid draw. Remove a rule or add another participant.';
+      return;
+    }
+    paint(get('names'), names);
+    paint(get('letters'), letters);
+    showInvites(people, letters, recipients, shuffle(letters).slice(0, names.length), blocked);
+  };
+}
+
+function animate(canvas, items, selected, duration) {
+  const finalAngle = 5 * tau - tau * items.indexOf(selected) / items.length;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    paint(canvas, items, finalAngle);
+    return Promise.resolve();
+  }
+  return new Promise(resolve => {
+    const start = performance.now();
+    function frame(now) {
+      const elapsed = Math.min(1, (now - start) / duration);
+      paint(canvas, items, finalAngle * (1 - (1 - elapsed) ** 4));
+      if (elapsed < 1) requestAnimationFrame(frame);
+      else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function openDraw(data) {
+  const { name, names, letters, recipient, letter } = data;
+  const validList = list => Array.isArray(list) && list.length > 0 &&
+    list.length <= 100 && list.every(item => typeof item === 'string' && item.length <= 100);
+  if (typeof name !== 'string' || !validList(names) || !validList(letters) ||
+      !names.includes(recipient) || !letters.includes(letter)) throw new Error('Invalid draw');
+  get('setup').hidden = true;
+  get('draw').hidden = false;
+  get('greeting').textContent = 'Your draw, ' + name;
+  paint(get('names'), names);
+  paint(get('letters'), letters);
+  get('spin').onclick = async () => {
+    get('spin').disabled = true;
+    await Promise.all([
+      animate(get('names'), names, recipient, 3100),
+      animate(get('letters'), letters, letter, 3700)
+    ]);
+    get('recipient').textContent = recipient;
+    get('letter-result').textContent = letter;
+    get('result').hidden = false;
+    get('instruction').hidden = true;
+    get('spin').hidden = true;
+  };
+}
+
+paint(get('names'), ['✧','✧','✧','✧','✧','✧']);
+paint(get('letters'), Array.from('NOEL'));
+if (location.hash.startsWith('#draw=')) {
+  try { openDraw(decode(location.hash.slice(6))); }
+  catch {
+    get('setup').hidden = true;
+    get('draw').hidden = false;
+    get('spin').hidden = true;
+    get('greeting').textContent = 'This draw link is incomplete';
+    get('instruction').textContent = 'Ask the organizer to send you your link again.';
+  }
+} else {
+  setup();
+}
+</script>
+</body>
+</html>
