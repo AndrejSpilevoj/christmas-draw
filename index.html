@@ -70,6 +70,12 @@ footer{text-align:center;color:#765832;margin-top:24px;font-size:1.4rem}
 <p id="instruction">Spin both wheels to reveal who you’re giving to and your letter.</p>
 <button class="primary" id="spin" type="button">Spin both wheels</button>
 <p id="result" hidden aria-live="polite">You’re giving to <strong id="recipient"></strong><br>Your letter is <strong id="letter-result"></strong></p>
+<form id="email-result" hidden style="max-width:360px;margin:18px auto 0">
+<label for="result-email">Your email address</label>
+<input id="result-email" type="email" autocomplete="email" required>
+<button class="secondary" type="submit">Open result email</button>
+<p>Your email app opens a draft. Tap Send to keep a copy.</p>
+</form>
 </section>
 <footer aria-hidden="true">✦ ❦ ✦</footer>
 </main>
@@ -366,6 +372,15 @@ function openDraw(data) {
     ]);
     get('recipient').textContent = recipient;
     get('letter-result').textContent = letter;
+    get('email-result').hidden = false;
+    get('email-result').onsubmit = event => {
+      event.preventDefault();
+      const email = get('result-email').value.trim();
+      const address = encodeURIComponent(email).replace('%40', '@');
+      const subject = encodeURIComponent('Your Christmas Draw result');
+      const body = encodeURIComponent('Gift recipient: ' + recipient + '\r\nGift letter: ' + letter);
+      location.href = 'mailto:' + address + '?subject=' + subject + '&body=' + body;
+    };
     get('result').hidden = false;
     get('instruction').hidden = true;
     get('spin').hidden = true;
