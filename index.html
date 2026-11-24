@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="lt">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>The Christmas Draw</title>
+<title>Kalėdinis vardų traukimas</title>
 <style>
 :root{color-scheme:light;--paper:#f5ead4;--ink:#302d23;--wine:#702c3d;--pine:#23463c;--gold:#a7773b;--line:#b79e77}
 *{box-sizing:border-box}body{margin:0;background:#17372f;color:var(--ink);font:1.05rem Georgia,serif}
@@ -36,45 +36,45 @@ footer{text-align:center;color:#765832;margin-top:24px;font-size:1.4rem}
 </head>
 <body>
 <main>
-<header><div class="ornament" aria-hidden="true">❦</div><h1>The Christmas Draw</h1><p>A family gift exchange</p></header>
-<section class="wheels" aria-label="Christmas draw wheels">
-<figure><div class="dial"><canvas id="names" width="600" height="600" aria-hidden="true"></canvas></div><figcaption>Gift recipient</figcaption></figure>
-<figure><div class="dial"><canvas id="letters" width="600" height="600" aria-hidden="true"></canvas></div><figcaption>Gift letter</figcaption></figure>
+<header><div class="ornament" aria-hidden="true">❦</div><h1>Kalėdinis vardų traukimas</h1><p>Šeimos dovanų mainai</p></header>
+<section class="wheels" aria-label="Kalėdinio traukimo ratai">
+<figure><div class="dial"><canvas id="names" width="600" height="600" aria-hidden="true"></canvas></div><figcaption>Dovanos gavėjas</figcaption></figure>
+<figure><div class="dial"><canvas id="letters" width="600" height="600" aria-hidden="true"></canvas></div><figcaption>Dovanos raidė</figcaption></figure>
 </section>
 <section class="panel" id="setup">
-<h2>Set up the family draw</h2>
-<p>Add everyone who will give a gift, then send each person their own link.</p>
+<h2>Paruoškite šeimos vardų traukimą</h2>
+<p>Įtraukite visus, kas dovanos dovaną, ir kiekvienam nusiųskite asmeninę nuorodą.</p>
 <form id="form">
 <div id="people"></div>
-<div class="actions"><button class="secondary" id="add" type="button">Add a person</button></div>
+<div class="actions"><button class="secondary" id="add" type="button">Pridėti dalyvį</button></div>
 <fieldset class="exclusions">
-<legend>Who can’t draw whom?</legend>
-<p>Add a pair to keep them from drawing each other. For a one-way rule, clear the checkbox.</p>
+<legend>Kas ko negali ištraukti?</legend>
+<p>Pasirinkite du dalyvius, kurie negali ištraukti vienas kito. Jei taisyklė galioja tik viena kryptimi, nuimkite varnelę.</p>
 <div id="exclusions"></div>
-<div class="actions"><button class="secondary" id="add-exclusion" type="button">Add a rule</button></div>
+<div class="actions"><button class="secondary" id="add-exclusion" type="button">Pridėti taisyklę</button></div>
 </fieldset>
-<label for="word">Christmas word</label>
-<input id="word" required placeholder="SNOWFLAKE" maxlength="100" aria-describedby="word-help">
-<p id="word-help">Use one word with at least as many distinct letters as people. Repeated letters count once.</p>
-<div class="actions"><button class="primary">Create draw links</button></div>
+<label for="word">Kalėdinis žodis</label>
+<input id="word" required placeholder="SNAIGĖ" maxlength="100" aria-describedby="word-help">
+<p id="word-help">Įrašykite vieną žodį, kuriame skirtingų raidžių būtų bent tiek, kiek yra dalyvių. Pasikartojanti raidė skaičiuojama vieną kartą.</p>
+<div class="actions"><button class="primary">Sukurti traukimo nuorodas</button></div>
 <p id="status" role="status"></p>
 </form>
 <section id="invitations" hidden>
-<h2>Private draw links</h2>
-<p>Send one link to each person. The roster order determines how many choices each wheel shows. Keep a copy of the links before closing this page.</p>
+<h2>Asmeninės traukimo nuorodos</h2>
+<p>Kiekvienam dalyviui nusiųskite jo nuorodą. Nuo dalyvių eilės priklauso, kiek variantų rodoma kiekviename rate. Prieš uždarydami puslapį išsisaugokite nuorodas.</p>
 <div id="links"></div><p id="invite-status" role="status"></p>
 </section>
 </section>
 <section class="panel" id="draw" hidden>
 <h2 id="greeting"></h2>
-<p id="instruction">Spin both wheels to reveal who you’re giving to and your letter.</p>
-<button class="primary" id="spin" type="button">Spin both wheels</button>
-<p id="result" hidden aria-live="polite">You’re giving to <strong id="recipient"></strong><br>Your letter is <strong id="letter-result"></strong></p>
+<p id="instruction">Pasukite abu ratus ir sužinokite, kam dovanosite dovaną ir kokia jūsų raidė.</p>
+<button class="primary" id="spin" type="button">Pasukti abu ratus</button>
+<p id="result" hidden aria-live="polite">Dovanos gavėjas: <strong id="recipient"></strong><br>Jūsų raidė: <strong id="letter-result"></strong></p>
 <form id="email-result" hidden style="max-width:360px;margin:18px auto 0">
-<label for="result-email">Your email address</label>
+<label for="result-email">Jūsų el. pašto adresas</label>
 <input id="result-email" type="email" autocomplete="email" required>
-<button class="secondary" type="submit">Open result email</button>
-<p>Your email app opens a draft. Tap Send to keep a copy.</p>
+<button class="secondary" type="submit">Atidaryti laišką su rezultatu</button>
+<p>El. pašto programa atvers laiško juodraštį. Paspauskite „Siųsti“, kad gautumėte kopiją.</p>
 </form>
 </section>
 <footer aria-hidden="true">✦ ❦ ✦</footer>
@@ -196,7 +196,7 @@ function addPerson() {
   const row = document.createElement('div');
   row.className = 'person';
   row.dataset.personId = String(++nextPersonId);
-  row.innerHTML = '<label>Name<input name="name" required maxlength="50" autocomplete="off"></label><label>Email<input name="email" type="email" required maxlength="254" autocomplete="off"></label><button type="button" class="secondary" aria-label="Remove participant">Remove</button>';
+  row.innerHTML = '<label>Vardas<input name="name" required maxlength="50" autocomplete="off"></label><label>El. paštas<input name="email" type="email" required maxlength="254" autocomplete="off"></label><button type="button" class="secondary" aria-label="Pašalinti dalyvį">Pašalinti</button>';
   row.querySelector('button').onclick = () => {
     if (get('people').children.length > 2) row.remove();
     updateRows();
@@ -217,11 +217,11 @@ function updateRows() {
 function refreshExclusions() {
   const roster = Array.from(get('people').children, (row, index) => ({
     id: row.dataset.personId,
-    label: row.querySelector('[name=name]').value.trim() || 'Person ' + (index + 1)
+    label: row.querySelector('[name=name]').value.trim() || 'Dalyvis ' + (index + 1)
   }));
   get('exclusions').querySelectorAll('select').forEach(select => {
     const value = select.value;
-    select.replaceChildren(new Option('Choose a person', ''));
+    select.replaceChildren(new Option('Pasirinkite dalyvį', ''));
     roster.forEach(person => select.add(new Option(person.label, person.id)));
     select.value = roster.some(person => person.id === value) ? value : '';
   });
@@ -230,7 +230,7 @@ function refreshExclusions() {
 function addExclusion() {
   const rule = document.createElement('div');
   rule.className = 'exclusion';
-  rule.innerHTML = '<label>Giver<select required></select></label><label>Cannot draw<select required></select></label><label><input type="checkbox" checked style="display:inline;width:auto;margin-right:7px">Block both directions</label><button class="secondary" type="button">Remove rule</button>';
+  rule.innerHTML = '<label>Dovanotojas<select required></select></label><label>Negali ištraukti<select required></select></label><label><input type="checkbox" checked style="display:inline;width:auto;margin-right:7px">Taikyti abiem kryptimis</label><button class="secondary" type="button">Pašalinti taisyklę</button>';
   rule.querySelector('button').onclick = () => rule.remove();
   get('exclusions').append(rule);
   refreshExclusions();
@@ -253,15 +253,15 @@ function showInvites(people, letters, recipients, assignedLetters, blocked) {
     const copy = document.createElement('button');
     copy.type = 'button';
     copy.className = 'secondary';
-    copy.textContent = 'Copy link';
+    copy.textContent = 'Kopijuoti nuorodą';
     copy.onclick = async () => {
       try {
         await navigator.clipboard.writeText(url.href);
-        get('invite-status').textContent = 'Link copied for ' + name + '.';
+        get('invite-status').textContent = 'Nuoroda nukopijuota (' + name + ').';
       } catch {
         const field = document.createElement('input');
         field.readOnly = true;
-        field.setAttribute('aria-label', 'Draw link for ' + name);
+        field.setAttribute('aria-label', 'Traukimo nuoroda: ' + name);
         field.value = url.href;
         row.append(field);
         field.select();
@@ -269,10 +269,10 @@ function showInvites(people, letters, recipients, assignedLetters, blocked) {
     };
     const mail = document.createElement('a');
     mail.className = 'mail';
-    mail.textContent = 'Open email draft';
-    const body = 'Hi ' + name + ',\n\nSpin the Christmas wheels to reveal your gift recipient and letter. This is your private link:\n\n' + url.href;
+    mail.textContent = 'Atidaryti laiško juodraštį';
+    const body = 'Sveiki, ' + name + '!\n\nPasukite ratus ir sužinokite, kam dovanosite dovaną ir kokia jūsų raidė. Štai jūsų asmeninė nuoroda:\n\n' + url.href;
     const address = encodeURIComponent(email).replace('%40', '@');
-    mail.href = 'mailto:' + address + '?subject=The%20Christmas%20Draw&body=' + encodeURIComponent(body);
+    mail.href = 'mailto:' + address + '?subject=' + encodeURIComponent('Kalėdinis vardų traukimas') + '&body=' + encodeURIComponent(body);
     actions.append(copy, mail);
     row.append(title, actions);
     get('links').append(row);
@@ -299,15 +299,15 @@ function setup() {
     const letters = [...new Set(Array.from(word.toUpperCase().normalize('NFC')))];
     let error = '';
     if (names.some(name => !name) || new Set(names.map(name => name.normalize('NFC').toLowerCase())).size !== names.length) {
-      error = 'Give everyone a distinct name, such as Alex S. and Alex M.';
+      error = 'Nurodykite skirtingus dalyvių vardus, pavyzdžiui, Tomas S. ir Tomas M.';
     } else if (new Set(people.map(person => person.email.toLowerCase())).size !== people.length) {
-      error = 'Use a different email address for each person.';
+      error = 'Kiekvienam dalyviui įrašykite skirtingą el. pašto adresą.';
     } else if (!/^\p{L}+$/u.test(word)) {
-      error = 'Enter one word containing only letters.';
+      error = 'Įrašykite vieną žodį, sudarytą tik iš raidžių.';
     } else if (letters.length < people.length) {
-      error = 'Choose a word with at least ' + people.length + ' distinct letters.';
+      error = 'Reikia bent tiek skirtingų raidžių, kiek yra dalyvių (' + people.length + ').';
     } else if (!/^https?:$/.test(location.protocol)) {
-      error = 'Open the hosted page before creating links that work on other devices.';
+      error = 'Atverkite paskelbtą puslapį, kad galėtumėte sukurti kituose įrenginiuose veikiančias nuorodas.';
     }
     get('status').textContent = error;
     if (error) return;
@@ -318,7 +318,7 @@ function setup() {
       const giver = namesById.get(giverSelect.value);
       const recipient = namesById.get(recipientSelect.value);
       if (!giver || !recipient || giver === recipient) {
-        get('status').textContent = 'Choose two different people for each rule.';
+        get('status').textContent = 'Kiekvienai taisyklei pasirinkite du skirtingus dalyvius.';
         return;
       }
       blocked.get(giver).add(recipient);
@@ -326,7 +326,7 @@ function setup() {
     }
     const recipients = recipientsFor(names, blocked);
     if (!recipients) {
-      get('status').textContent = 'These rules leave no valid draw. Remove a rule or add another participant.';
+      get('status').textContent = 'Pagal šias taisykles vardų ištraukti nepavyks. Pašalinkite taisyklę arba pridėkite dalyvį.';
       return;
     }
     paint(get('names'), names);
@@ -361,7 +361,7 @@ function openDraw(data) {
       !names.includes(recipient) || !letters.includes(letter)) throw new Error('Invalid draw');
   get('setup').hidden = true;
   get('draw').hidden = false;
-  get('greeting').textContent = 'Your draw, ' + name;
+  get('greeting').textContent = 'Jūsų traukimas: ' + name;
   paint(get('names'), names);
   paint(get('letters'), letters);
   get('spin').onclick = async () => {
@@ -377,8 +377,8 @@ function openDraw(data) {
       event.preventDefault();
       const email = get('result-email').value.trim();
       const address = encodeURIComponent(email).replace('%40', '@');
-      const subject = encodeURIComponent('Your Christmas Draw result');
-      const body = encodeURIComponent('Gift recipient: ' + recipient + '\r\nGift letter: ' + letter);
+      const subject = encodeURIComponent('Jūsų kalėdinio vardų traukimo rezultatas');
+      const body = encodeURIComponent('Dovanos gavėjas: ' + recipient + '\r\nDovanos raidė: ' + letter);
       location.href = 'mailto:' + address + '?subject=' + subject + '&body=' + body;
     };
     get('result').hidden = false;
@@ -395,8 +395,8 @@ if (location.hash.startsWith('#draw=')) {
     get('setup').hidden = true;
     get('draw').hidden = false;
     get('spin').hidden = true;
-    get('greeting').textContent = 'This draw link is incomplete';
-    get('instruction').textContent = 'Ask the organizer to send you your link again.';
+    get('greeting').textContent = 'Ši traukimo nuoroda nepilna';
+    get('instruction').textContent = 'Paprašykite organizatoriaus dar kartą atsiųsti jūsų nuorodą.';
   }
 } else {
   setup();
